@@ -179,9 +179,6 @@ int main(
 		exit(EXIT_FAILURE);
 	}
 
-	cout << argv[1] << " in to " << argv[2] << endl;
-	cout << "Checking validity..." << endl;
-
 	// open the directory givn as an argument and check it's a valid file
 	// either a file or directory
 	DIR* dir;
@@ -193,8 +190,6 @@ int main(
 
 	closedir(dir);
 
-	cout << "Checking if valid arguments..." << endl;
-
 	// check if the given directory is not only valid but actually
 	// a directory
 	struct stat stat_s;
@@ -204,15 +199,11 @@ int main(
 		cout << "Argument 1 given was not a directory." << endl;
 		exit(EXIT_FAILURE);
 	}
-   
-	cout << "Searching..." << endl;
 
 	// get the list of all source files in the directory given
 	// as an argument
 	vector<string> files;
 	GetSourceFiles(argv[1], &files);
-	
-	cout << "Parsing files..." << endl;
 	Parse(files, argv[2]);
 
 	return EXIT_SUCCESS;
