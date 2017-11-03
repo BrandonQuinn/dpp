@@ -23,6 +23,15 @@ using namespace std;
 #define MAX_STR_LEN 1024 // at least greater than 260 (windows limit)
 #define MAX_COMMENT_LEN 10000 // arbitrary
 
+// NOTE(brandon) Add more types of source files
+const int EXT_COUNT = 4;
+const char SRC_EXTS[EXT_COUNT][MAX_STR_LEN] = {
+    "cpp",
+    "c",
+    "java", 
+    "kt"
+};
+
 bool IsSourceFile(
         char* src)
 {
@@ -30,14 +39,18 @@ bool IsSourceFile(
     char* tok = strtok(newStr, ".");
     while (tok != NULL) {
         // c++ header or source file
-        if (strcmp(tok, SRC) == 0 || strcmp(tok, HEADER) == 0) {
-            return true;
+        for (int i = 0; i < EXT_COUNT; i++) {
+            if (strcmp(tok, SRC_EXTS[i]) == 0) {
+                return true;
+            }
         }
         tok = strtok(NULL, ".");
     }
     return false;
 }
 
+// NOTE(brandon) Sort by file and by name
+// NOTE(brandon) Create different types of notes and categories
 void RecursiveFind(
         char* src,
 		queue<string>* queue,
@@ -91,7 +104,6 @@ void Parse(
         char* outputFile)
 {
     ifstream input;
-    map<string, string> map;
 
     // create the output file
     ofstream output;
@@ -105,14 +117,17 @@ void Parse(
     // loop through each files contents and check if we are in a comment or not
     // and if we are and there's the correct documentation info then add
     // the contents of this documents to the output file
-    // doc comments are in the form NOTE(name)
-    for (int i = 0; i < files.size(); i++) {
-        input.open(files.at(i));
+    // doc comments are in the form NOTE(name) test
+    for (int f = 0; f < files.size(); f++) {
+        input.open(files.at(f));
         
         if (input.bad()) {
-            cout << "Could not open input file: " << files.at(i) << endl;
+            cout << "Could not open input file: " << files.at(f) << endl;
             exit(EXIT_FAILURE);
         }
+        
+        cout << "File: " << files.at(f) << "\n";
+        output << "File: " << files.at(f) << "\n";
 
         int lineCount = 0;
         while (!input.eof()) {
@@ -120,19 +135,14 @@ void Parse(
             char bufLine[MAX_STR_LEN];
             char bufName[MAX_STR_LEN];
             char bufCont[MAX_STR_LEN];
-
             int ncount = 0, count = 0, ccount = 0;
-
-            input.getline(bufLine, MAX_STR_LEN);
             
+            input.getline(bufLine, MAX_STR_LEN);
             for (int i = 0; i < strlen(bufLine); i++) {
                 int c = bufLine[i];
 
                 if (i + 4 < strlen(bufLine)) {
-                    if (bufLine[i] == 'N' && bufLine[i+1] == 'O' && bufLine[i+2] == 'T' && bufLine[i+3] == 'E' && bufLine[i+4] == '(') {
-                        cout << "File: " << files.at(i) << "\n";
-                        output << "File: " << files.at(i) << "\n";
-                        
+                    if (bufLine[i] == 'N' && bufLine[i+1] == 'O' && bufLine[i+2] == 'T' && bufLine[i+3] == 'E' && bufLine[i+4] == '(') {                
                         // read the name
                         i += 5;
                         while (bufLine[i] != ')') {
@@ -144,8 +154,8 @@ void Parse(
                             bufCont[ccount++] = bufLine[i++];
                         } bufCont[ccount] = '\0';
                         
-                        cout << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << "\n" << endl;
-                        output << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << "\n" << endl;
+                        cout << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
+                        output << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
                     }
                 }
             }
