@@ -3,7 +3,7 @@ Command line tool for searching for and outputting notes in code that are for pr
 
 #Usage
 
-simply say dpp C:\srcDirectory C:\output.txt
+simply say `dpp C:\srcDirectory C:\output.txt`
 
 It will search for all strings fitting the pattern 'NOTE(name) blah blah comment', without the single quotes.
 Then it will simply print out which line they're on and which file they're in.
