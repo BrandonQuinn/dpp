@@ -1,8 +1,8 @@
 /*
  * main.cpp
  *
- *  Created on: 3 Nov. 2017
- *      Author: Brandon
+ *	Created on: 3 Nov. 2017
+ *		Author: Brandon
  */
 
 #include <iostream>
@@ -26,37 +26,37 @@ using namespace std;
 // NOTE(brandon) Add moe types of source files
 const int EXT_COUNT = 4;
 const char SRC_EXTS[EXT_COUNT][MAX_STR_LEN] = {
-    "cpp",
-    "c",
-    "java", 
-    "kt"
+	"cpp",
+	"c",
+	"java", 
+	"kt"
 };
 
 bool IsSourceFile(
-        char* src)
+		char* src)
 {
-    char newStr[MAX_STR_LEN]; strcpy(newStr, src);
-    char* tok = strtok(newStr, ".");
-    while (tok != NULL) {
-        // c++ header or source file
-        for (int i = 0; i < EXT_COUNT; i++) {
-            if (strcmp(tok, SRC_EXTS[i]) == 0) {
-                return true;
-            }
-        }
-        tok = strtok(NULL, ".");
-    }
-    return false;
+	char newStr[MAX_STR_LEN]; strcpy(newStr, src);
+	char* tok = strtok(newStr, ".");
+	while (tok != NULL) {
+		// c++ header or source file
+		for (int i = 0; i < EXT_COUNT; i++) {
+			if (strcmp(tok, SRC_EXTS[i]) == 0) {
+				return true;
+			}
+		}
+		tok = strtok(NULL, ".");
+	}
+	return false;
 }
 
 // NOTE(brandon) Sort by file and by name
 // NOTE(brandon) Create different types of notes and categories
 void RecursiveFind(
-        char* src,
+		char* src,
 		queue<string>* queue,
 		vector<string>* files)
 {
-    string current = queue->front();
+	string current = queue->front();
 	queue->pop();
 	DIR* dir;
 	dirent* ent;
@@ -91,131 +91,131 @@ void RecursiveFind(
 }
 
 void GetSourceFiles(
-        char* directory, 
-        vector<string>* files)
+		char* directory, 
+		vector<string>* files)
 {
-    queue<string> queue;
-    queue.push(string(directory));
-    RecursiveFind(directory, &queue, files);
+	queue<string> queue;
+	queue.push(string(directory));
+	RecursiveFind(directory, &queue, files);
 }
 
 void Parse(
-        vector<string> files,
-        char* outputFile)
+		vector<string> files,
+		char* outputFile)
 {
-    ifstream input;
+	ifstream input;
 
-    // create the output file
-    ofstream output;
-    output.open(outputFile);
+	// create the output file
+	ofstream output;
+	output.open(outputFile);
 
-    if (output.bad()) {
-        cout << "Error: Bad output file" << endl;
-        exit(EXIT_FAILURE);
-    }
+	if (output.bad()) {
+		cout << "Error: Bad output file" << endl;
+		exit(EXIT_FAILURE);
+	}
 
-    // loop through each files contents and check if we are in a comment or not
-    // and if we are and there's the correct documentation info then add
-    // the contents of this documents to the output file
-    // doc comments are in the form NOTE(name) test
-    for (int f = 0; f < files.size(); f++) {
-        input.open(files.at(f));
-        
-        if (input.bad()) {
-            cout << "Could not open input file: " << files.at(f) << endl;
-            exit(EXIT_FAILURE);
-        }
-        
-        int lineCount = 0;
-        bool hasNotes = false;
-        while (!input.eof() && !input.bad()) {
-            lineCount++;
-            char bufLine[MAX_STR_LEN];
-            char bufName[MAX_STR_LEN];
-            char bufCont[MAX_STR_LEN];
-            int ncount = 0, count = 0, ccount = 0;
-            
-            input.getline(bufLine, MAX_STR_LEN);
-            for (int i = 0; i < strlen(bufLine); i++) {
-                int c = bufLine[i];
+	// loop through each files contents and check if we are in a comment or not
+	// and if we are and there's the correct documentation info then add
+	// the contents of this documents to the output file
+	// doc comments are in the form NOTE(name) test
+	for (int f = 0; f < files.size(); f++) {
+		input.open(files.at(f));
+		
+		if (input.bad()) {
+			cout << "Could not open input file: " << files.at(f) << endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		int lineCount = 0;
+		bool hasNotes = false;
+		while (!input.eof() && !input.bad()) {
+			lineCount++;
+			char bufLine[MAX_STR_LEN];
+			char bufName[MAX_STR_LEN];
+			char bufCont[MAX_STR_LEN];
+			int ncount = 0, count = 0, ccount = 0;
+			
+			input.getline(bufLine, MAX_STR_LEN);
+			for (int i = 0; i < strlen(bufLine); i++) {
+				int c = bufLine[i];
 
-                if (c == EOF) break;
+				if (c == EOF) break;
 
-                if (i + 4 < strlen(bufLine)) {
-                    if (bufLine[i] == 'N' && bufLine[i+1] == 'O' && bufLine[i+2] == 'T' && bufLine[i+3] == 'E' && bufLine[i+4] == '(') {                
-                        // read the name
-                        i += 5;
-                        while (bufLine[i] != ')') {
-                            bufName[ncount++] = bufLine[i++];
-                        } i += 2; bufName[ncount] = '\0';
+				if (i + 4 < strlen(bufLine)) {
+					if (bufLine[i] == 'N' && bufLine[i+1] == 'O' && bufLine[i+2] == 'T' && bufLine[i+3] == 'E' && bufLine[i+4] == '(') {				
+						// read the name
+						i += 5;
+						while (bufLine[i] != ')') {
+							bufName[ncount++] = bufLine[i++];
+						} i += 2; bufName[ncount] = '\0';
 
-                        // read the rest of the buffer
-                        while (i < strlen(bufLine)) { // strange but works :)
-                            bufCont[ccount++] = bufLine[i++];
-                        } bufCont[ccount] = '\0';
-                        hasNotes = true;
-                        cout << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
-                        output << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
-                    }
-                }
-            }
-        }
+						// read the rest of the buffer
+						while (i < strlen(bufLine)) { // strange but works :)
+							bufCont[ccount++] = bufLine[i++];
+						} bufCont[ccount] = '\0';
+						hasNotes = true;
+						cout << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
+						output << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
+					}
+				}
+			}
+		}
 
-        if (hasNotes) {
-            output << "\tIn File: " << files.at(f) << endl;
-            cout << "\tIn File: " << files.at(f) << endl << endl;
-        }
+		if (hasNotes) {
+			output << "\tIn File: " << files.at(f) << endl;
+			cout << "\tIn File: " << files.at(f) << endl << endl;
+		}
 
-        input.close();
-    }
+		input.close();
+	}
 }
 
 int main(
-        int argc, 
-        char* argv[])
+		int argc, 
+		char* argv[])
 {
-    if (argc != 3) {
-        cout << "Wrong number of arguments." << endl;
-        exit(EXIT_FAILURE);
-    }
+	if (argc != 3) {
+		cout << "Wrong number of arguments." << endl;
+		exit(EXIT_FAILURE);
+	}
 
-    cout << argv[1] << " in to " << argv[2] << endl;
-    cout << "Checking validity..." << endl;
+	cout << argv[1] << " in to " << argv[2] << endl;
+	cout << "Checking validity..." << endl;
 
-    // open the directory givn as an argument and check it's a valid file
-    // either a file or directory
-    DIR* dir;
-    
-    if ((dir = opendir(argv[1])) == NULL) {
-        cout << "Argument 1 given was not a valid file." << endl;
-        exit(EXIT_FAILURE);
-    }
+	// open the directory givn as an argument and check it's a valid file
+	// either a file or directory
+	DIR* dir;
+	
+	if ((dir = opendir(argv[1])) == NULL) {
+		cout << "Argument 1 given was not a valid file." << endl;
+		exit(EXIT_FAILURE);
+	}
 
-    closedir(dir);
+	closedir(dir);
 
-    cout << "Checking if valid arguments..." << endl;
+	cout << "Checking if valid arguments..." << endl;
 
-    // check if the given directory is not only valid but actually
-    // a directory
-    struct stat stat_s;
-    stat(argv[1], &stat_s);
-    
-    if (!S_ISDIR(stat_s.st_mode)) {
-        cout << "Argument 1 given was not a directory." << endl;
-        exit(EXIT_FAILURE);
-    }
+	// check if the given directory is not only valid but actually
+	// a directory
+	struct stat stat_s;
+	stat(argv[1], &stat_s);
+	
+	if (!S_ISDIR(stat_s.st_mode)) {
+		cout << "Argument 1 given was not a directory." << endl;
+		exit(EXIT_FAILURE);
+	}
    
-    cout << "Searching..." << endl;
+	cout << "Searching..." << endl;
 
-    // get the list of all source files in the directory given
-    // as an argument
-    vector<string> files;
-    GetSourceFiles(argv[1], &files);
-    
-    cout << "Parsing files..." << endl;
-    Parse(files, argv[2]);
+	// get the list of all source files in the directory given
+	// as an argument
+	vector<string> files;
+	GetSourceFiles(argv[1], &files);
+	
+	cout << "Parsing files..." << endl;
+	Parse(files, argv[2]);
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 
