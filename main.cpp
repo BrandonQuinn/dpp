@@ -20,10 +20,10 @@ using namespace std;
 
 #define SRC "cpp"
 #define HEADER "h"
-#define MAX_STR_LEN 1024 // at least greater than 260 (windows limit)
+#define MAX_STR_LEN 4096 // at least greater than 260 (windows limit)
 #define MAX_COMMENT_LEN 10000 // arbitrary
 
-// NOTE(brandon) Add more types of source files
+// NOTE(brandon) Add moe types of source files
 const int EXT_COUNT = 4;
 const char SRC_EXTS[EXT_COUNT][MAX_STR_LEN] = {
     "cpp",
@@ -126,11 +126,9 @@ void Parse(
             exit(EXIT_FAILURE);
         }
         
-        cout << "File: " << files.at(f) << "\n";
-        output << "File: " << files.at(f) << "\n";
-
         int lineCount = 0;
-        while (!input.eof()) {
+        bool hasNotes = false;
+        while (!input.eof() && !input.bad()) {
             lineCount++;
             char bufLine[MAX_STR_LEN];
             char bufName[MAX_STR_LEN];
@@ -140,6 +138,8 @@ void Parse(
             input.getline(bufLine, MAX_STR_LEN);
             for (int i = 0; i < strlen(bufLine); i++) {
                 int c = bufLine[i];
+
+                if (c == EOF) break;
 
                 if (i + 4 < strlen(bufLine)) {
                     if (bufLine[i] == 'N' && bufLine[i+1] == 'O' && bufLine[i+2] == 'T' && bufLine[i+3] == 'E' && bufLine[i+4] == '(') {                
@@ -153,12 +153,17 @@ void Parse(
                         while (i < strlen(bufLine)) { // strange but works :)
                             bufCont[ccount++] = bufLine[i++];
                         } bufCont[ccount] = '\0';
-                        
+                        hasNotes = true;
                         cout << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
                         output << "Line: " << lineCount << " [" << bufName << "]: " << bufCont << endl;
                     }
                 }
             }
+        }
+
+        if (hasNotes) {
+            output << "\tIn File: " << files.at(f) << endl;
+            cout << "\tIn File: " << files.at(f) << endl << endl;
         }
 
         input.close();
